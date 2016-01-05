@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Electron Read Us</title>
+<link rel="stylesheet" href="css/bootstrap-3.3.6.css" />
+<style>
+.drop-area{
+    box-sizing: border-box;
+    color: rgb(51, 51, 51);
+    display: block;
+    float: left;
+    font-family: Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    height: 400px;
+    line-height: 18.2px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 550px;
+    word-wrap: break-word;
+}
+.drop-area-inner{
+    background-color: rgb(250, 250, 250);
+    border-bottom-color: rgb(229, 229, 229);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-style: solid;
+    border-bottom-width: 1px;
+    border-image-outset: 0px;
+    border-image-repeat: stretch;
+    border-image-slice: 100%;
+    border-image-source: none;
+    border-image-width: 1;
+    border-left-color: rgb(229, 229, 229);
+    border-left-style: solid;
+    border-left-width: 1px;
+    border-right-color: rgb(229, 229, 229);
+    border-right-style: solid;
+    border-right-width: 1px;
+    border-top-color: rgb(229, 229, 229);
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-top-style: solid;
+    border-top-width: 1px;
+    box-shadow: rgba(0, 0, 0, 0.0470588) 0px 0px 10px 0px inset;
+    box-sizing: border-box;
+    color: rgb(51, 51, 51);
+    display: block;
+    font-family: Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+    font-size: 13px;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    height: 400px;
+    line-height: 18.2px;
+    padding-bottom: 120px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 120px;
+    position: relative;
+    text-align: center;
+    width: 510px;
+    word-wrap: break-word;
+}
+</style>
+</head>
+<body>
+<h1 style="margin-left:10px;">Electron ドラッグアンドドロップ バックアップツール</h1>
+<div>
+    <div class="main-left" style="float:left; width:550px;">
+        <div id="fileDropArea" style="height:400px;">
+            <div class="drop-area">
+                <div class="drop-area-inner">
+                    <span class=""></span>
+                    <h3>ファイルドロップエリア</h3>
+                    <p>ここにコピーまたは移動するファイルをドロップしてください</p>
+                </div>
+            </div>
+        </div>
+        <div style="padding:10px 10px 10px 10px;">
+            <input type="hidden" id="copyMode" name="copyMode" value="copy" />
+            <div class="btn-group copy-mode" data-toggle="buttons-radio">
+                <button type="button" class="btn btn-info active" name="copy">コピー</button>
+                <button type="button" class="btn btn-info" name="move">移動</button>
+            </div>
+        </div>
+        <div id="debugArea">
+
+        </div>
+    </div>
+
+    <div class="main-right" style="float:left; width:550px;">
+        <div id="dirDropArea" style="height:400px;">
+            <div class="drop-area">
+                <div class="drop-area-inner">
+                    <span class=""></span>
+                    <h3>ディレクトリドロップエリア</h3>
+                    <p>ここにコピーまたは移動先のディレクトリをドロップしてください</p>
+                </div>
+            </div>
+        </div>
+        <div style="padding:10px 10px 10px 10px;">
+            <input type="text" class="form-control" id="dirName" name="dirName" value="" style="display:inline; width:80%;" >
+            <button class="btn btn-primary" id="setDirNameBtn" onclick="setDirName( $('#dirName') );">
+                <span>選択</span>
+            </button>
+        </div>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+
+<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+           <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h3 id="myModalTitle"></h3>
+    </div>
+    <div class="modal-body">
+        <span id="myModalMain"></span>
+    </div>
+    <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">閉じる</button>
+    </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.jQuery = window.$ = require('jquery');
+</script>
+<script src="js/bootstrap-3.3.6.js"></script>
+<script>
+
+document.ondragover = document.ondrop = function(e) {
+    e.preventDefault();
+    return false;
+};
+
+var fileDropArea = document.getElementById('fileDropArea');
+fileDropArea.ondragover = function () {
+    return false;
+};
+fileDropArea.ondragleave = fileDropArea.ondragend = function () {
+    return false;
+};
+fileDropArea.ondrop = function (e) {
+    e.preventDefault();
+
+    copyFile(e.dataTransfer.files);
+
+    var file = e.dataTransfer.files[0];
+//    fileDropArea.innerText = file.name;
+    //console.log(file.path);
+
+    return false;
+};
+
+var dirDropArea = document.getElementById('dirDropArea');
+dirDropArea.ondragover = function () {
+    return false;
+};
+dirDropArea.ondragleave = dirDropArea.ondragend = function () {
+    return false;
+};
+dirDropArea.ondrop = function (e) {
+    e.preventDefault();
+    dropDir(e.dataTransfer.files);
+    return false;
+};
+$(document).ready(function(){
+    $(".copy-mode .btn").click(function() {
+        $(".copy-mode .btn").removeClass('active');
+        $("#copyMode").val($(this).attr('name'));
+    });
+});
+</script>
+<script src="func.js"></script>
+</body>
+</html>
